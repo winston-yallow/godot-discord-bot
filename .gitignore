@@ -1,3 +1,7 @@
+# Prevent accidentally committing config file
+# (contains secret bot token)
+src/bot-config.json
+
 # Logs
 logs
 *.log
