@@ -37,11 +37,23 @@ files. You don't need to install nodemon globally, instead just run the "dev" li
 script: `npm run dev`
 
 ### Docker/Podman
-Example for building and running the container:
+The Containerfile uses multiple stages. By default a production build is generated.
+
+You can instead build with `--target bot-dev` to get a container with nodemon to
+automatically restart the bot when the source files change.
+
+The development container expects you to mount the host `./src` directory into the
+container at `/home/bot/src` so that nodemon can monitor changes.
+
+Example for building and running the dev container:
 ```bash
-podman build --tag godot-discord-bot .
-podman run -it godot-discord-bot
+podman build --target bot-dev --tag godot-discord-bot .
+podman run -v ./src:/home/bot/src -it godot-discord-bot
 ```
+
+Since the source files are mounted into the container, you don't need to rebuild the
+container image often. An explicit rebuild is only needed when the dependencies are
+updated.
 
 
 ## Usage
