@@ -66,3 +66,14 @@ to the bot. It will then run the update procedure.
 ### Using Commands
 Type `/` into a message prompt on a server with the bot. It will show you a list of
 all available commands with a small description each.
+
+
+## Contributing
+
+### Code Structure
+The code is organized into "Units". A unit is basically a collection of commands that
+belong together. Have a look at the files in `./src/units` to get an overview.
+
+These unit files get dynamically loaded by the modular client class. Basically
+everything in `.src/lib` is the backbone used for loading and running the unit
+files.
