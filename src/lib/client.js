@@ -19,6 +19,7 @@ const path = require('node:path');
  * @property {string} token Discord API token
  * @property {string[]} admins List of user IDs that are allowed to administrate the bot
  * @property {string} clientId ID of the Discord application
+ * @property {string[]} guilds Guilds to register commands in (uses global registration if empty)
  */
 
 /**
@@ -167,22 +168,17 @@ class ModularClient extends Client {
 			return;
 		}
 
-		// TODO: Don't hardcode the guild ID
-		const route = Routes.applicationGuildCommands(
-			this.#config.clientId,
-			'638873827123920908',
-		);
-		const options = {
-			body: this.#slashCommands.map(cmd => cmd.toJSON()),
-		};
-
-		const rest = new REST().setToken(this.#config.token);
-		try {
-			await rest.put(route, options);
-			await msg.reply({ content: 'refreshed all commands' });
-		}
-		catch (error) {
-			console.error(error);
+		for (const guildId of this.#config.guilds) {
+			const route = Routes.applicationGuildCommands(this.#config.clientId, guildId);
+			const options = { body: this.#slashCommands.map(cmd => cmd.toJSON()) };
+			const rest = new REST().setToken(this.#config.token);
+			try {
+				await rest.put(route, options);
+				await msg.reply({ content: 'refreshed all commands' });
+			}
+			catch (error) {
+				console.error(error);
+			}
 		}
 	}
 }

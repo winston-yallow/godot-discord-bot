@@ -17,13 +17,16 @@ Create a JSON file at `./src/bot-config.json` with the following content:
 {
     "clientId": "YOUR_CLIENT_ID",
     "token": "YOUR_TOKEN",
-    "admins": []
+    "admins": [],
+    "guilds": []
 }
 ```
 Replace `YOUR_CLIENT_ID` and `TOKEN` with the correct values. The `"admins"` field is
 a list of user IDs as strings. These users will have permission to refresh the slash
 commands registered for the discord application. At the very least this list should
 contain your own user ID.
+The `"guilds"` field should list all guild IDs that the commands should be registered
+in.
 
 
 ## Running the Bot
