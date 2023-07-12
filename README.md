@@ -12,16 +12,19 @@ Please follow the [discord.js Guide](https://discordjs.guide/preparations/settin
 for creating an application and getting a token.
 
 ### Configuring the Bot
-Create a JSON file at `./src/bot-config.json` with the following content:
-```json
-{
-    "clientId": "YOUR_CLIENT_ID",
-    "token": "YOUR_TOKEN",
-    "admins": [],
-    "guilds": []
-}
+Create a JavaScript file at `./src/config.js` with the following content:
+```js
+/** @type {import('./lib/client').ModularClientConfig} */
+const config = {
+    clientId: 'CLIENT_ID',
+    token: 'TOKEN',
+    admins: [],
+    guilds: [],
+};
+
+module.exports = config;
 ```
-Replace `YOUR_CLIENT_ID` and `TOKEN` with the correct values. The `"admins"` field is
+Replace `CLIENT_ID` and `TOKEN` with the correct values. The `"admins"` field is
 a list of user IDs as strings. These users will have permission to refresh the slash
 commands registered for the discord application. At the very least this list should
 contain your own user ID.
