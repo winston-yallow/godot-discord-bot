@@ -10,6 +10,7 @@ const unit = new Unit();
 
 unit.createCommand()
 	.setName('pronounce')
+	.setRateLimit(10)
 	.setDescription('Explains how Godot is usually pronounced')
 	.setCallback(async interaction => {
 		await interaction.reply({ embeds: [embed] });

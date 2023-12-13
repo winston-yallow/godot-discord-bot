@@ -25,6 +25,7 @@ const unit = new Unit();
 
 unit.createCommand()
 	.setName('docs')
+	.setRateLimit(5)
 	.setDescription('Shows a link to the documentation')
 	.addStringOption(version_selection)
 	.setCallback(async interaction => {
@@ -45,6 +46,7 @@ unit.createCommand()
 
 unit.createCommand()
 	.setName('step')
+	.setRateLimit(5)
 	.setDescription('Shows a link to the step by step guide')
 	.addStringOption(version_selection)
 	.setCallback(async interaction => {
@@ -65,6 +67,7 @@ unit.createCommand()
 
 unit.createCommand()
 	.setName('class')
+	.setRateLimit(5)
 	.setDescription('Generates a link to the docs for a specific class')
 	.addStringOption(version_selection)
 	.addStringOption(option => option
@@ -91,6 +94,7 @@ unit.createCommand()
 
 unit.createCommand()
 	.setName('tutorials')
+	.setRateLimit(5)
 	.setDescription('Shows a link to the "Tutorials & Resources" page')
 	.addStringOption(version_selection)
 	.setCallback(async interaction => {

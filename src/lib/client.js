@@ -9,7 +9,7 @@ const {
 	REST,
 	Routes,
 } = require('discord.js');
-const { Unit } = require('./units.js');
+const { Unit, RateLimitError } = require('./units.js');
 const path = require('node:path');
 const { globSync } = require('glob');
 
@@ -38,6 +38,7 @@ class ModularClient extends Client {
 
 	// Messages are send to the user to inform them of issues
 	static MSG_SERVER_ERROR = 'There was an error while executing this command. Please notify the moderators.';
+	static MSG_RATE_LIMIT = 'This command was already used recently, please wait a bit before using it again in this channel.';
 
 	/** @type {ModularClientConfig} */
 	#config;
@@ -126,15 +127,23 @@ class ModularClient extends Client {
 		}
 
 		try {
-			await cmd.callback(interaction);
+			await cmd.execute(interaction);
 		}
 		catch (error) {
-			console.error(error);
-			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp({ content: ModularClient.MSG_SERVER_ERROR, ephemeral: true });
+			let msg = '';
+			if (error instanceof RateLimitError) {
+				msg = ModularClient.MSG_RATE_LIMIT;
 			}
 			else {
-				await interaction.reply({ content: ModularClient.MSG_SERVER_ERROR, ephemeral: true });
+				console.error(error);
+				msg = ModularClient.MSG_SERVER_ERROR;
+			}
+			// Send the message using either a follow up or a reply
+			if (interaction.replied || interaction.deferred) {
+				await interaction.followUp({ content: msg, ephemeral: true });
+			}
+			else {
+				await interaction.reply({ content: msg, ephemeral: true });
 			}
 		}
 	}

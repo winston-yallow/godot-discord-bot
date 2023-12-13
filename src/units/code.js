@@ -36,6 +36,7 @@ const unit = new Unit();
 
 unit.createCommand()
 	.setName('code')
+	.setRateLimit(10)
 	.setDescription('Explains how to embed code in discord messages')
 	.setCallback(async interaction => {
 		await interaction.reply({ embeds: [embed] });

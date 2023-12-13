@@ -17,6 +17,7 @@ const unit = new Unit();
 
 unit.createCommand()
 	.setName('downloads')
+	.setRateLimit(10)
 	.setDescription('Provides links to all websites and platforms to download Godot from')
 	.setCallback(async interaction => {
 		await interaction.reply({ embeds: [embed] });

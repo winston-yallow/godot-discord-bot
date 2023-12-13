@@ -47,6 +47,7 @@ const unit = new Unit();
 
 unit.createCommand()
 	.setName('ask')
+	.setRateLimit(10)
 	.setDescription('Explains to directly state the question')
 	.setCallback(async interaction => {
 		await interaction.reply({ embeds: [embedAsk] });
@@ -56,6 +57,7 @@ unit.createCommand()
 
 unit.createCommand()
 	.setName('questions')
+	.setRateLimit(10)
 	.setDescription('Explains what a good question looks like')
 	.setCallback(async interaction => {
 		await interaction.reply({ embeds: [embedQuestions] });
