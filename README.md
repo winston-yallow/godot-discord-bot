@@ -18,6 +18,8 @@ Create a JavaScript file at `./src/config.js` with the following content:
 const config = {
     clientId: 'CLIENT_ID',
     token: 'TOKEN',
+	units: '*.js',
+	unitsIgnore: ['ping.js'],
     admins: [],
     guilds: [],
 };

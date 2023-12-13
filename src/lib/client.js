@@ -10,14 +10,16 @@ const {
 	Routes,
 } = require('discord.js');
 const { Unit } = require('./units.js');
-const fs = require('node:fs');
 const path = require('node:path');
+const { globSync } = require('glob');
 
 /**
  * @typedef ModularClientConfig
  * Configuration data for a ModularClient
  * @property {string} token Discord API token
  * @property {string[]} admins List of user IDs that are allowed to administrate the bot
+ * @property {string|string[]} units Units to load (uses glob)
+ * @property {string|string[]|undefined} unitsIgnore Units to ignore (uses glob)
  * @property {string} clientId ID of the Discord application
  * @property {string[]} guilds Guilds to register commands in (uses global registration if empty)
  */
@@ -61,6 +63,21 @@ class ModularClient extends Client {
 		this.once(Events.ClientReady, c => {
 			console.log(`Ready! Logged in as ${c.user.tag}`);
 		});
+
+		// Load configured units
+		const searchdir = path.resolve(path.join(__dirname, '../units'));
+		globSync(this.#config.units, { cwd: searchdir, ignore: this.#config.unitsIgnore })
+			.filter(file => file.endsWith('.js'))
+			.map(file => {
+				console.log(`Loading unit file "${file}"`);
+				const unitPath = path.join(searchdir, file);
+				const unit = require(unitPath);
+				if (!(unit instanceof Unit)) {
+					console.warn(ModularClient.WARN_NOT_A_UNIT, unitPath);
+					return;
+				}
+				this.registerUnit(unit);
+			});
 	}
 
 	/**
@@ -69,29 +86,6 @@ class ModularClient extends Client {
 	 */
 	login() {
 		return super.login(this.#config.token);
-	}
-
-	/**
-	 * Loads and registers all unit files from a given directory.
-	 * @param {string} unitsPath Directory containing the unit files
-	 */
-	loadAllUnits(unitsPath) {
-		fs.readdirSync(unitsPath)
-			.filter(file => file.endsWith('.js'))
-			.map(file => this.loadUnit(path.join(unitsPath, file)));
-	}
-
-	/**
-	 * Loads and registers a single unit file from a given file path.
-	 * @param {string} unitPath Path of the unit file
-	 */
-	loadUnit(unitPath) {
-		const unit = require(unitPath);
-		if (!(unit instanceof Unit)) {
-			console.warn(ModularClient.WARN_NOT_A_UNIT, unitPath);
-			return;
-		}
-		this.registerUnit(unit);
 	}
 
 	/**
