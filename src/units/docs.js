@@ -81,7 +81,7 @@ unit.createCommand()
 				.setTitle(`${className} Documentation (Godot ${version})`)
 				.setURL(new URL(path, base_url).href)
 				.setDescription(
-					`Online API Reference for ${className}. You can also use the offline`
+					`Online API Reference for ${className}. You can also use the offline `
 					+ 'documentation by pressing F1 in Godot and searching for a class name.',
 				),
 		] });
