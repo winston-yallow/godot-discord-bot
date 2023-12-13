@@ -31,13 +31,13 @@ const embedQuestions = new GodotEmbedBuilder()
 			value: 'Helpers often ask you questions to better understand the problem. '
 				+ 'This makes it easier to understand your problem. Not answering them or '
 				+ 'saying "it\'s not relevant" is not helpful. Even if it is not directly '
-				+ 'relevant, there is a high chance the answer will give more context for'
+				+ 'relevant, there is a high chance the answer will give more context for '
 				+ 'the people that are helping you.',
 		},
 		{
 			name: 'Don\'t be demanding',
 			value: 'Please don\'t expect people to immediately help you. We all do '
-				+ 'this in our freetime. It may take some time until someone who can help'
+				+ 'this in our freetime. It may take some time until someone who can help '
 				+ 'you will answer.',
 		},
 	])
