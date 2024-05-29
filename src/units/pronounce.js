@@ -4,8 +4,8 @@ const { GodotEmbedBuilder } = require('../lib/helpers.js');
 const embed = new GodotEmbedBuilder()
 	.setTitle('Pronunciation')
 	.setDescription(
-		'While the name stemmed from the play "Waiting for Godot", at this point everyone '
-		+ 'pronounces the engine name differently — including the foundation team. Because '
+		'While the name stems from the play "Waiting for Godot", at this point everyone '
+		+ 'pronounces the engine name differently — including the Foundation team. Because '
 		+ "we think that's beautiful, we don't police any pronounciation anymore."
 	)
 ;
