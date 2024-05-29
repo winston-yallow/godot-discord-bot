@@ -3,7 +3,11 @@ const { GodotEmbedBuilder } = require('../lib/helpers.js');
 
 const embed = new GodotEmbedBuilder()
 	.setTitle('Pronunciation')
-	.setDescription('Godot is usually pronounced "go-dough" (the "t" is silent).')
+	.setDescription(
+		'While the name stemmed from the play "Waiting for Godot", at this point everyone '
+		+ 'pronounces the engine name differently — including the foundation team. Because '
+		+ "we think that's beautiful, we don't police any pronounciation anymore."
+	)
 ;
 
 const unit = new Unit();
