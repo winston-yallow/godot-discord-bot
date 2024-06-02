@@ -28,11 +28,10 @@ const embedQuestions = new GodotEmbedBuilder()
 		},
 		{
 			name: 'Respond to Helpers',
-			value: 'Helpers often ask you questions to better understand the problem. '
-				+ 'This makes it easier to understand your problem. Not answering them or '
-				+ 'saying "it\'s not relevant" is not helpful. Even if it is not directly '
-				+ 'relevant, there is a high chance the answer will give more context for '
-				+ 'the people that are helping you.',
+			value: 'Helpers often ask you questions to better understand your problem. '
+				+ 'Not answering them or saying "it\'s not relevant" is not helpful. '
+				+ 'Even if it is not directly relevant, there is a high chance the answer '
+				+ 'will give more context for the people that are helping you.',
 		},
 		{
 			name: 'Don\'t be demanding',
