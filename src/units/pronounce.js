@@ -6,7 +6,7 @@ const embed = new GodotEmbedBuilder()
 	.setDescription(
 		'While the name stems from the play "Waiting for Godot", at this point everyone '
 		+ 'pronounces the engine name differently — including the Foundation team. Because '
-		+ "we think that's beautiful, we don't police any pronounciation anymore."
+		+ "we think that's beautiful, we don't police any pronunciation anymore."
 	)
 ;
 
