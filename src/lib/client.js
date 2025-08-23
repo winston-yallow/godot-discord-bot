@@ -3,6 +3,7 @@ const {
 	Collection,
 	Events,
 	ChatInputCommandInteraction,
+	ContextMenuCommandInteraction,
 	GatewayIntentBits,
 	Partials,
 	ChannelType,
@@ -14,6 +15,13 @@ const path = require('node:path');
 const { globSync } = require('glob');
 
 /**
+ * @typedef {object} GuildConfig
+ * Configuration for a specific guild
+ * @property {string} modChannel - ID of the moderation channel for the guild
+ * @property {string} modRole - ID of the moderation role for the guild
+ */
+
+/**
  * @typedef ModularClientConfig
  * Configuration data for a ModularClient
  * @property {string} token Discord API token
@@ -21,7 +29,7 @@ const { globSync } = require('glob');
  * @property {string|string[]} units Units to load (uses glob)
  * @property {string|string[]|undefined} unitsIgnore Units to ignore (uses glob)
  * @property {string} clientId ID of the Discord application
- * @property {string[]} guilds Guilds to register commands in (uses global registration if empty)
+ * @property {{[key:string]: GuildConfig}} [guildConfigs] Guild configurations
  */
 
 /**
@@ -45,6 +53,8 @@ class ModularClient extends Client {
 
 	/** @type {Collection<string, import('./units.js').SlashCallbackBuilder>} */
 	#slashCommands = new Collection();
+	/** @type {Collection<string, import('./units.js').ContextMenuCallbackBuilder>} */
+	#contextCommands = new Collection();
 
 	/**
 	 * Creates a new modular client
@@ -70,7 +80,7 @@ class ModularClient extends Client {
 		globSync(this.#config.units, { cwd: searchdir, ignore: this.#config.unitsIgnore })
 			.filter(file => file.endsWith('.js'))
 			.map(file => {
-				console.log(`Loading unit file "${file}"`);
+				// console.log(`Loading unit file "${file}"`);
 				const unitPath = path.join(searchdir, file);
 				const unit = require(unitPath);
 				if (!(unit instanceof Unit)) {
@@ -98,7 +108,15 @@ class ModularClient extends Client {
 			if (this.#slashCommands.has(cmd.name)) {
 				console.warn(ModularClient.WARN_OVERRIDE_SLASH, cmd.name);
 			}
+			console.log('command registered: ', cmd.name);
 			this.#slashCommands.set(cmd.name, cmd);
+		}
+		for (const cmd of unit.contextCommands) {
+			if (this.#contextCommands.has(cmd.name)) {
+				console.warn(ModularClient.WARN_OVERRIDE_CONTEXT, cmd.name);
+			}
+			console.log('command registered: ', cmd.name);
+			this.#contextCommands.set(cmd.name, cmd);
 		}
 	}
 
@@ -112,14 +130,51 @@ class ModularClient extends Client {
 		if (interaction instanceof ChatInputCommandInteraction) {
 			await this.#onCommandInteraction(interaction);
 		}
+		else if (interaction instanceof ContextMenuCommandInteraction) {
+			await this.#onContextMenuInteraction(interaction);
+		}
 	}
 
 	/**
-	 * Private method that is called every time a slash command is issued
+	 * Private method that is called every time a command is issued
 	 * @param {ChatInputCommandInteraction} interaction Command coming from a user
 	 */
 	async #onCommandInteraction(interaction) {
 		const cmd = this.#slashCommands.get(interaction.commandName);
+		if (!cmd) {
+			console.error(ModularClient.ERR_INVALID_CMD, interaction.commandName);
+			await interaction.reply({ content: ModularClient.MSG_SERVER_ERROR, ephemeral: true });
+			return;
+		}
+
+		try {
+			await cmd.execute(interaction);
+		}
+		catch (error) {
+			let msg = '';
+			if (error instanceof RateLimitError) {
+				msg = ModularClient.MSG_RATE_LIMIT;
+			}
+			else {
+				console.error(error);
+				msg = ModularClient.MSG_SERVER_ERROR;
+			}
+			// Send the message using either a follow up or a reply
+			if (interaction.replied || interaction.deferred) {
+				await interaction.followUp({ content: msg, ephemeral: true });
+			}
+			else {
+				await interaction.reply({ content: msg, ephemeral: true });
+			}
+		}
+	}
+
+	/**
+	 * Private method that is called every time a context menu command is issued
+	 * @param {ContextMenuCommandInteraction} interaction Command coming from a user
+	 */
+	async #onContextMenuInteraction(interaction) {
+		const cmd = this.#contextCommands.get(interaction.commandName);
 		if (!cmd) {
 			console.error(ModularClient.ERR_INVALID_CMD, interaction.commandName);
 			await interaction.reply({ content: ModularClient.MSG_SERVER_ERROR, ephemeral: true });
@@ -171,13 +226,23 @@ class ModularClient extends Client {
 			return;
 		}
 
-		for (const guildId of this.#config.guilds) {
+		for (const guildId of Object.keys(this.#config.guildConfigs)) {
+
 			const route = Routes.applicationGuildCommands(this.#config.clientId, guildId);
 			const options = { body: this.#slashCommands.map(cmd => cmd.toJSON()) };
 			const rest = new REST().setToken(this.#config.token);
 			try {
 				await rest.put(route, options);
-				await msg.reply({ content: 'refreshed all commands' });
+				await msg.reply({ content: `refreshed all commands for guild ${guildId}` });
+			}
+			catch (error) {
+				console.error(error);
+			}
+
+			const contextRoute = Routes.applicationGuildCommands(this.#config.clientId, guildId);
+			const contextOptions = { body: this.#contextCommands.map(cmd => cmd.toJSON()) };
+			try {
+				await rest.put(contextRoute, contextOptions);
 			}
 			catch (error) {
 				console.error(error);
