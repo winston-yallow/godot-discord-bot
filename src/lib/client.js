@@ -80,7 +80,7 @@ class ModularClient extends Client {
 		globSync(this.#config.units, { cwd: searchdir, ignore: this.#config.unitsIgnore })
 			.filter(file => file.endsWith('.js'))
 			.map(file => {
-				// console.log(`Loading unit file "${file}"`);
+				console.log(`Loading unit file "${file}"`);
 				const unitPath = path.join(searchdir, file);
 				const unit = require(unitPath);
 				if (!(unit instanceof Unit)) {
