@@ -6,7 +6,7 @@ const embed = new GodotEmbedBuilder()
 	.setDescription(
 		'While the name stems from the play "Waiting for Godot", at this point everyone '
 		+ 'pronounces the engine name differently — including the Foundation team. Because '
-		+ "we think that's beautiful, we don't police any pronunciation anymore."
+		+ 'we think that\'s beautiful, we don\'t police any pronunciation anymore.',
 	)
 ;
 
@@ -18,7 +18,6 @@ unit.createCommand()
 	.setDescription('Explains how Godot is usually pronounced')
 	.setCallback(async interaction => {
 		await interaction.reply({ embeds: [embed] });
-	})
-;
+	});
 
 module.exports = unit;
