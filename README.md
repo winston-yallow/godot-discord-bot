@@ -36,7 +36,7 @@ a list of user IDs as strings. These users will have permission to refresh the s
 commands registered for the discord application. At the very least this list should
 contain your own user ID.
 The `"guildConfigs"` field should list all guild IDs that the commands should be registered
-in, followed with a the channel used for moderation alerts, and moderator role for that should be pinged in that server.
+in, followed with the channel used for moderation alerts, and moderator role that should be pinged in that server.
 
 ## Running the Bot
 
