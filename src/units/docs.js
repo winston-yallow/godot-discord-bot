@@ -16,7 +16,7 @@ const version_selection = new SlashCommandStringOption()
 
 /** @type {{[key: string]: string}} */
 const version_mapping = {
-	'3': '3.5',
+	'3': '3.6',
 	'4': 'stable',
 };
 
