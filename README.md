@@ -24,7 +24,7 @@ const config = {
   unitsIgnore: ["ping.js"],
   admins: [],
   guildConfigs: {
-    GUILD_ID: { modChannel: "CHANNEL_ID", modRole: "ROLE_ID" },
+    "GUILD_ID": { modChannel: "CHANNEL_ID", modRole: "ROLE_ID" },
   },
 };
 
