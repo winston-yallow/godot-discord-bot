@@ -229,20 +229,14 @@ class ModularClient extends Client {
 		for (const guildId of Object.keys(this.#config.guildConfigs)) {
 
 			const route = Routes.applicationGuildCommands(this.#config.clientId, guildId);
-			const options = { body: this.#slashCommands.map(cmd => cmd.toJSON()) };
+			const payload = [];
+			this.#slashCommands.forEach(cmd => payload.push(cmd.toJSON()));
+			this.#contextCommands.forEach(cmd => payload.push(cmd.toJSON()));
+			const options = { body: payload };
 			const rest = new REST().setToken(this.#config.token);
 			try {
 				await rest.put(route, options);
 				await msg.reply({ content: `refreshed all commands for guild ${guildId}` });
-			}
-			catch (error) {
-				console.error(error);
-			}
-
-			const contextRoute = Routes.applicationGuildCommands(this.#config.clientId, guildId);
-			const contextOptions = { body: this.#contextCommands.map(cmd => cmd.toJSON()) };
-			try {
-				await rest.put(contextRoute, contextOptions);
 			}
 			catch (error) {
 				console.error(error);
