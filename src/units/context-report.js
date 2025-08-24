@@ -17,7 +17,7 @@ unit.createContextMenuCommand()
 		const embed = new GodotEmbedBuilder()
 			.setTitle('Reported Message from ' + interaction.user.username + ':')
 			.setDescription(`https://discord.com/channels/${interaction.guildId}/${interaction.channelId}/${interaction.targetId}`);
-		channel.send({ content: `${modRole}`, embeds: [embed] });
+		channel.send({ content: `<@&${modRole}>`, embeds: [embed] });
 		await interaction.reply({ flags: MessageFlags.Ephemeral, content: 'Message has been reported. A staff member will check soon.' });
 	});
 
