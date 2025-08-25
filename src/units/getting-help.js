@@ -42,6 +42,15 @@ const embedQuestions = new GodotEmbedBuilder()
 	])
 ;
 
+const embedRepost = new GodotEmbedBuilder()
+	.setTitle('Asking in multiple channels')
+	.setDescription(
+		'Please don\'t post the same question in multiple channels '
+		+ '- to avoid that people spend time answering already '
+		+ 'solved problems. Feel free to move the question by deleting one of them.'
+	)
+;
+
 const unit = new Unit();
 
 unit.createCommand()
@@ -60,6 +69,15 @@ unit.createCommand()
 	.setDescription('Explains what a good question looks like')
 	.setCallback(async interaction => {
 		await interaction.reply({ embeds: [embedQuestions] });
+	})
+;
+
+unit.createCommand()
+	.setName('repost')
+	.setRateLimit(10)
+	.setDescription('Explains to not ask in multiple channels')
+	.setCallback(async interaction => {
+		await interaction.reply({ embeds: [embedRepost] })
 	})
 ;
 
