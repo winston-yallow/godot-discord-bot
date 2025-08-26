@@ -9,7 +9,7 @@ const embed = new GodotEmbedBuilder()
 		{ name: 'GitHub', value: 'https://github.com/godotengine/godot/releases' },
 		{ name: 'Itch', value: 'https://godotengine.itch.io/godot' },
 		{ name: 'Steam', value: 'https://store.steampowered.com/app/404790/Godot_Engine/' },
-		{ name: 'Tuxfamily', value: 'https://downloads.tuxfamily.org/godotengine/' },
+		// { name: 'Tuxfamily', value: 'https://downloads.tuxfamily.org/godotengine/' }, // commented out since site is down, keep it in case it goes back up
 	])
 ;
 
