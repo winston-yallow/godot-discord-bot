@@ -11,7 +11,6 @@ class GodotEmbedBuilder extends EmbedBuilder {
 	constructor() {
 		super();
 		this.setColor(0x458dc0);
-		this.setTimestamp();
 	}
 }
 
