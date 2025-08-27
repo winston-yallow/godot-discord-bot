@@ -4,11 +4,10 @@ const { GodotEmbedBuilder } = require('../lib/helpers.js');
 const embedRepost = new GodotEmbedBuilder()
     .setTitle('Asking in multiple channels')
     .setDescription(
-        'Please don\'t post the same question in multiple channels '
-        + '- to avoid that people spend time answering already '
-        + 'solved problems. Feel free to move the question by deleting one of them.'
+        'Please don\'t post the same question or message multiple times. '
+        + 'This avoids wasting volunteer\'s time on questions that were already answered. Thank you. '
     )
-;
+    ;
 
 const unit = new Unit();
 
@@ -19,6 +18,6 @@ unit.createCommand()
     .setCallback(async interaction => {
         await interaction.reply({ embeds: [embedRepost] })
     })
-;
+    ;
 
 module.exports = unit;
