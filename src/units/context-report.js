@@ -17,14 +17,36 @@ unit.createContextMenuCommand()
 		const reportedMessage = interaction.targetMessage;
 		const embed = new GodotEmbedBuilder()
 			.setAuthor({ name: interaction.user.username, iconURL: interaction.user.avatarURL() ?? interaction.user.defaultAvatarURL })
-			.setDescription(reportedMessage.content || 'No content');
+			.setDescription(reportedMessage.content || '-# no content');
+		const embeds = [embed];
 		const msg = `<@&${modRole}> New report created by <@${interaction.user.id}>\n`
 		+ `:link:Link: https://discord.com/channels/${interaction.guildId}/${interaction.channelId}/${interaction.targetId}`;
 		const files = [];
+		const largeFiles = [];
+		let uploadLimit = 1024 * 1024 * 8; // 8mb
+		switch (interaction.guild.premiumTier) {
+			case 2: uploadLimit = 1024 * 1024 * 50; break;
+			case 3: uploadLimit = 1024 * 1024 * 100; break;
+		}
+		uploadLimit = uploadLimit * 0.95; // small buffer
 		reportedMessage.attachments.forEach(attachment => {
-			files.push(attachment.url);
+			if (attachment.size > uploadLimit) {
+				largeFiles.push(attachment.url);
+			} else {
+				files.push(attachment.url);
+			}
 		});
-		channel.send({ content: msg, embeds: [embed], files: files });
+		if (largeFiles.length > 0) {
+			let embedDescription = 'These files were too large to attach to this report:';
+			largeFiles.forEach(file => {
+				embedDescription += '\n' + file;
+			});
+			const largeFilesEmbed = new GodotEmbedBuilder()
+				.setTitle('Large Files')
+				.setDescription(embedDescription);
+			embeds.push(largeFilesEmbed);
+		}
+		channel.send({ content: msg, embeds: embeds, files: files });
 		await interaction.reply({ flags: MessageFlags.Ephemeral, content: 'Message has been reported. A staff member will check soon.' });
 	});
 
