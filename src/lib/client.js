@@ -12,7 +12,7 @@ const {
 } = require('discord.js');
 const { Unit, RateLimitError } = require('./units.js');
 const path = require('node:path');
-const { globSync } = require('glob');
+const fs = require('node:fs')
 
 /**
  * @typedef {object} GuildConfig
@@ -26,8 +26,6 @@ const { globSync } = require('glob');
  * Configuration data for a ModularClient
  * @property {string} token Discord API token
  * @property {string[]} admins List of user IDs that are allowed to administrate the bot
- * @property {string|string[]} units Units to load (uses glob)
- * @property {string|string[]|undefined} unitsIgnore Units to ignore (uses glob)
  * @property {string} clientId ID of the Discord application
  * @property {{[key:string]: GuildConfig}} [guildConfigs] Guild configurations
  */
@@ -75,12 +73,13 @@ class ModularClient extends Client {
 			console.log(`Ready! Logged in as ${c.user.tag}`);
 		});
 
-		// Load configured units
+		// Load units
 		const searchdir = path.resolve(path.join(__dirname, '../units'));
-		globSync(this.#config.units, { cwd: searchdir, ignore: this.#config.unitsIgnore })
-			.filter(file => file.endsWith('.js'))
-			.map(file => {
-				console.log(`Loading unit file "${file}"`);
+		console.log(searchdir);
+		fs.readdir(searchdir, (err, files) => {
+			files.forEach(file => {
+				const filename = file.toLowerCase();
+				if (!filename.endsWith('.js')) return;
 				const unitPath = path.join(searchdir, file);
 				const unit = require(unitPath);
 				if (!(unit instanceof Unit)) {
@@ -89,6 +88,7 @@ class ModularClient extends Client {
 				}
 				this.registerUnit(unit);
 			});
+		});
 	}
 
 	/**
