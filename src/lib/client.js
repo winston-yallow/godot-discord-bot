@@ -75,7 +75,6 @@ class ModularClient extends Client {
 
 		// Load units
 		const searchdir = path.resolve(path.join(__dirname, '../units'));
-		console.log(searchdir);
 		fs.readdir(searchdir, (err, files) => {
 			files.forEach(file => {
 				const filename = file.toLowerCase();
