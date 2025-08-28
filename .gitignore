@@ -1,6 +1,7 @@
 # Prevent accidentally committing config file
 # (contains secret bot token)
-src/instance/config.js
+instance/*
+!instance/exampleConfig.js
 
 # Logs
 logs
