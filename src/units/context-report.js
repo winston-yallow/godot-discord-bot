@@ -16,11 +16,13 @@ unit.createContextMenuCommand()
 		const channel = interaction.client.channels.cache.get(modChannel);
 		const reportedMessage = interaction.targetMessage;
 		const embed = new GodotEmbedBuilder()
-			.setAuthor({ name: interaction.user.username, iconURL: interaction.user.avatarURL() ?? interaction.user.defaultAvatarURL })
+			.setAuthor({ name: reportedMessage.author.username, iconURL: reportedMessage.author.avatarURL() ?? interaction.user.defaultAvatarURL })
 			.setDescription(reportedMessage.content || '-# no content');
 		const embeds = [embed];
-		const msg = `<@&${modRole}> New report created by <@${interaction.user.id}>\n`
-		+ `:link:Link: https://discord.com/channels/${interaction.guildId}/${interaction.channelId}/${interaction.targetId}`;
+		const msg = `<@&${modRole}> New report created by <@${interaction.user.id}>\n\n`
+		+ `:link: Link: https://discord.com/channels/${interaction.guildId}/${interaction.channelId}/${interaction.targetId}\n`
+		+ `:bust_in_silhouette: Reported User: <@${reportedMessage.author.id}>\n`
+		+ ':speech_balloon: Reported Content:\n';
 		const files = [];
 		const largeFiles = [];
 		let uploadLimit = 1024 * 1024 * 8; // 8mb
