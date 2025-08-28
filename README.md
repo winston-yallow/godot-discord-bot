@@ -16,7 +16,7 @@ for creating an application and getting a token.
 Create a JavaScript file at `./instance/config.js` with the following content, or use the included exampleConfig.js:
 
 ```js
-/** @type {import('./lib/client').ModularClientConfig} */
+/** @type {import('../src/lib/client').ModularClientConfig} */
 const config = {
   clientId: "CLIENT_ID",
   token: "TOKEN",
@@ -26,7 +26,7 @@ const config = {
     4: { displayName: "Godot 4 (stable)", urlFragment: "stable" },
   },
   guildConfigs: {
-    "GUILD_ID": { modChannel: "CHANNEL_ID", modRole: "ROLE_ID" },
+    GUILD_ID: { modChannel: "CHANNEL_ID", modRole: "ROLE_ID" },
   },
 };
 
