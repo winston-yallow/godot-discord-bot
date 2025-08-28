@@ -1,26 +1,37 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs');
+const config = require('../instance/config');
 
-const url = 'https://docs.godotengine.org/en/stable/classes/';
+const baseUrl = 'https://docs.godotengine.org/en/';
 
 async function fetchAndParse() {
 	try {
-		const response = await axios.get(url);
-		const $ = cheerio.load(response.data);
-
-		const hyperlinkedItems = [];
-		$('div[itemprop="articleBody"] a:not([href*="#"])').each((index, element) => {
-			const text = $(element).text().trim();
-			if (text) {
-				hyperlinkedItems.push(text);
-			}
+		const docVersions = config.docVersions;
+		const promises = Object.values(docVersions).map((version) => {
+			const url = `${baseUrl}${version.urlFragment}/classes/`;
+			return axios.get(url);
 		});
 
-		const csvText = hyperlinkedItems.join('\n');
-		fs.writeFileSync('src/instance/global-class-list.csv', csvText);
+		const responses = await Promise.all(promises);
 
-		console.log('CSV file generated successfully!');
+		responses.forEach((response, index) => {
+			const $ = cheerio.load(response.data);
+
+			const hyperlinkedItems = [];
+			$('div[itemprop="articleBody"] a:not([href*="#"])').each((index, element) => {
+				const text = $(element).text().trim();
+				if (text) {
+					hyperlinkedItems.push(text);
+				}
+			});
+
+			const csvText = hyperlinkedItems.join('\n');
+			const version = Object.keys(config.docVersions)[index];
+			fs.writeFileSync(`src/instance/global-class-list-${version}.csv`, csvText);
+
+			console.log(`CSV file generated successfully for version ${version}!`);
+		});
 	} catch (error) {
 		console.error('Error fetching or parsing page:', error);
 	}
