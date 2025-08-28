@@ -10,12 +10,12 @@ async function fetchAndParse() {
 		const docVersions = config.docVersions;
 		const promises = Object.values(docVersions).map((version) => {
 			const url = `${baseUrl}${version.urlFragment}/classes/`;
-			return axios.get(url);
+			return axios.get(url).then(response => ({ version, response }));
 		});
 
 		const responses = await Promise.all(promises);
 
-		responses.forEach((response, index) => {
+		responses.forEach(({ version, response }) => {
 			const $ = cheerio.load(response.data);
 
 			const hyperlinkedItems = [];
@@ -27,14 +27,12 @@ async function fetchAndParse() {
 			});
 
 			const csvText = hyperlinkedItems.join('\n');
-			const version = Object.keys(config.docVersions)[index];
-			fs.writeFileSync(`src/instance/global-class-list-${version}.csv`, csvText);
+			fs.writeFileSync(`src/instance/global-class-list-${version.urlFragment}.csv`, csvText);
 
-			console.log(`CSV file generated successfully for version ${version}!`);
+			console.log(`CSV file generated successfully for version ${version.urlFragment}!`);
 		});
 	} catch (error) {
 		console.error('Error fetching or parsing page:', error);
 	}
 }
-
 module.exports = { fetchAndParse };
