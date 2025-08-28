@@ -132,4 +132,4 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-src/instance/global-class-list.csv
+src/instance/global-class-list-*.csv
