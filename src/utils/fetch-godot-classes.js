@@ -1,7 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs');
-const config = require('../instance/config');
+const config = require('../../instance/config');
 
 const baseUrl = 'https://docs.godotengine.org/en/';
 
