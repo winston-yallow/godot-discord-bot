@@ -27,7 +27,7 @@ async function fetchAndParse() {
 			});
 
 			const csvText = hyperlinkedItems.join('\n');
-			fs.writeFileSync(`src/instance/global-class-list-${version.urlFragment}.csv`, csvText);
+			fs.writeFileSync(`instance/global-class-list-${version.urlFragment}.csv`, csvText);
 
 			console.log(`CSV file generated successfully for version ${version.urlFragment}!`);
 		});
