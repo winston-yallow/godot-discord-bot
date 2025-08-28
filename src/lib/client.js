@@ -10,6 +10,7 @@ const {
 	REST,
 	Routes,
 } = require('discord.js');
+const classFetch = require('../utils/fetch-godot-classes');
 const { Unit, RateLimitError } = require('./units.js');
 const path = require('node:path');
 const fs = require('node:fs')
@@ -26,6 +27,7 @@ const fs = require('node:fs')
  * Configuration data for a ModularClient
  * @property {string} token Discord API token
  * @property {string[]} admins List of user IDs that are allowed to administrate the bot
+ * @property {{[key:string]: {displayName: string, urlFragment: string}}} docVersions
  * @property {string} clientId ID of the Discord application
  * @property {{[key:string]: GuildConfig}} [guildConfigs] Guild configurations
  */
@@ -208,6 +210,7 @@ class ModularClient extends Client {
 	 * @param {import('discord.js').Message} msg Message send by a user
 	 */
 	async #onMessageCreate(msg) {
+		const allowedCommands = ['refresh commands', 'fetch classes']; // Add more commands as needed
 		if (msg.channel.type != ChannelType.DM) {
 			// Ignore non-DM messages
 			return;
@@ -220,26 +223,33 @@ class ModularClient extends Client {
 			await msg.reply({ content: 'you are not an administrator' });
 			return;
 		}
-		else if (msg.content != 'refresh commands') {
+		else if (!allowedCommands.includes(msg.content)) {
 			await msg.reply({ content: 'unknown command' });
 			return;
 		}
 
-		for (const guildId of Object.keys(this.#config.guildConfigs)) {
+		if (msg.content === 'refresh commands') {
 
-			const route = Routes.applicationGuildCommands(this.#config.clientId, guildId);
-			const payload = [];
-			this.#slashCommands.forEach(cmd => payload.push(cmd.toJSON()));
-			this.#contextCommands.forEach(cmd => payload.push(cmd.toJSON()));
-			const options = { body: payload };
-			const rest = new REST().setToken(this.#config.token);
-			try {
-				await rest.put(route, options);
-				await msg.reply({ content: `refreshed all commands for guild ${guildId}` });
+			for (const guildId of Object.keys(this.#config.guildConfigs)) {
+
+				const route = Routes.applicationGuildCommands(this.#config.clientId, guildId);
+				const payload = [];
+				this.#slashCommands.forEach(cmd => payload.push(cmd.toJSON()));
+				this.#contextCommands.forEach(cmd => payload.push(cmd.toJSON()));
+				const options = { body: payload };
+				const rest = new REST().setToken(this.#config.token);
+				try {
+					await rest.put(route, options);
+					await msg.reply({ content: `refreshed all commands for guild ${guildId}` });
+				}
+				catch (error) {
+					console.error(error);
+				}
 			}
-			catch (error) {
-				console.error(error);
-			}
+		}
+		else if (msg.content === 'fetch classes') {
+			classFetch.fetchAndParse();
+			await msg.reply({ content: `pulled all classes into the csv!` });
 		}
 	}
 }

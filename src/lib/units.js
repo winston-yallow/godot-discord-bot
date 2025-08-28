@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, ContextMenuCommandBuilder } = require('discord.js');
-const config = require('../config');
+const config = require('../../instance/config');
 /**
  * A custom error raised when a rate limit is exceeded
  */
