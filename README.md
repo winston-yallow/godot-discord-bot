@@ -13,7 +13,7 @@ for creating an application and getting a token.
 
 ### Configuring the Bot
 
-Create a JavaScript file at `./src/config.js` with the following content:
+Create a JavaScript file at `./instance/config.js` with the following content, or use the included exampleConfig.js:
 
 ```js
 /** @type {import('./lib/client').ModularClientConfig} */
@@ -21,6 +21,10 @@ const config = {
   clientId: "CLIENT_ID",
   token: "TOKEN",
   admins: [],
+  docVersions: {
+    3: { displayName: "Godot 3 (LTS)", urlFragment: "3.6" },
+    4: { displayName: "Godot 4 (stable)", urlFragment: "stable" },
+  },
   guildConfigs: {
     "GUILD_ID": { modChannel: "CHANNEL_ID", modRole: "ROLE_ID" },
   },
