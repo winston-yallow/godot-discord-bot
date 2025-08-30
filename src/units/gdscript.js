@@ -16,7 +16,7 @@ const unit = new Unit();
 unit.createCommand()
     .setName('gdscript')
     .setRateLimit(10)
-    .setDescription('Explains to not ask in multiple channels')
+    .setDescription('Provides resources for learning GDScript')
     .setCallback(async interaction => {
         await interaction.reply({ embeds: [embedRepost] })
     })
