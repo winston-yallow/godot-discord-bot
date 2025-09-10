@@ -13,7 +13,7 @@ const {
 const classFetch = require('../utils/fetch-godot-classes');
 const { Unit, RateLimitError } = require('./units.js');
 const path = require('node:path');
-const fs = require('node:fs')
+const fs = require('node:fs');
 
 /**
  * @typedef {object} GuildConfig
@@ -27,7 +27,7 @@ const fs = require('node:fs')
  * Configuration data for a ModularClient
  * @property {string} token Discord API token
  * @property {string[]} admins List of user IDs that are allowed to administrate the bot
- * @property {{[key:string]: {displayName: string, urlFragment: string}}} docVersions
+ * @property {{[key:string]: {displayName: string, urlFragment: string}}} docVersions Godot versions for docs
  * @property {string} clientId ID of the Discord application
  * @property {{[key:string]: GuildConfig}} [guildConfigs] Guild configurations
  */
@@ -210,7 +210,8 @@ class ModularClient extends Client {
 	 * @param {import('discord.js').Message} msg Message send by a user
 	 */
 	async #onMessageCreate(msg) {
-		const allowedCommands = ['refresh commands', 'fetch classes']; // Add more commands as needed
+		// Add more commands as needed
+		const allowedCommands = ['refresh commands', 'fetch classes'];
 		if (msg.channel.type != ChannelType.DM) {
 			// Ignore non-DM messages
 			return;
@@ -249,7 +250,7 @@ class ModularClient extends Client {
 		}
 		else if (msg.content === 'fetch classes') {
 			classFetch.fetchAndParse();
-			await msg.reply({ content: `pulled all classes into the csv!` });
+			await msg.reply({ content: 'pulled all classes into the csv!' });
 		}
 	}
 }
