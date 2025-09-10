@@ -9,6 +9,7 @@ const {
 	ChannelType,
 	REST,
 	Routes,
+	AutocompleteInteraction,
 } = require('discord.js');
 const classFetch = require('../utils/fetch-godot-classes');
 const { Unit, RateLimitError } = require('./units.js');
@@ -128,7 +129,7 @@ class ModularClient extends Client {
 	 * @param {import('discord.js').Interaction} interaction Interaction coming from a user
 	 */
 	async #onInteractionCreate(interaction) {
-		if (interaction instanceof ChatInputCommandInteraction) {
+		if (interaction instanceof ChatInputCommandInteraction || interaction instanceof AutocompleteInteraction) {
 			await this.#onCommandInteraction(interaction);
 		}
 		else if (interaction instanceof ContextMenuCommandInteraction) {
@@ -138,10 +139,15 @@ class ModularClient extends Client {
 
 	/**
 	 * Private method that is called every time a command is issued
-	 * @param {ChatInputCommandInteraction} interaction Command coming from a user
+	 * @param {ChatInputCommandInteraction | AutocompleteInteraction} interaction Command coming from a user
 	 */
 	async #onCommandInteraction(interaction) {
 		const cmd = this.#slashCommands.get(interaction.commandName);
+		if (interaction instanceof AutocompleteInteraction) {
+			cmd.autocompleteCallback(interaction);
+			return;
+		}
+
 		if (!cmd) {
 			console.error(ModularClient.ERR_INVALID_CMD, interaction.commandName);
 			await interaction.reply({ content: ModularClient.MSG_SERVER_ERROR, ephemeral: true });

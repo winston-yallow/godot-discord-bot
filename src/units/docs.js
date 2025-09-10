@@ -1,6 +1,8 @@
-const { SlashCommandStringOption } = require('discord.js');
+const { SlashCommandStringOption, MessageFlags } = require('discord.js');
 const { Unit } = require('../lib/units.js');
 const { GodotEmbedBuilder } = require('../lib/helpers.js');
+const fs = require('fs');
+const config = require('../../instance/config');
 
 
 const base_url = 'https://docs.godotengine.org/en/';
@@ -19,6 +21,12 @@ const version_mapping = {
 	'3': '3.6',
 	'4': 'stable',
 };
+
+// caching of classes for /class command
+const classList = {};
+for (const key in config.docVersions) {
+	classList[config.docVersions[key].urlFragment] = { lastModified: 0, classes: [] };
+}
 
 const unit = new Unit();
 
@@ -73,10 +81,18 @@ unit.createCommand()
 	.addStringOption(option => option
 		.setName('class')
 		.setDescription('Name of the class you want to link')
-		.setRequired(true))
+		.setRequired(true)
+		.setAutocomplete(true))
 	.setCallback(async interaction => {
 		const version = interaction.options.getString('version');
 		const className = interaction.options.getString('class');
+		if (!classList[config.docVersions[version].urlFragment].classes.includes(className)) {
+			await interaction.reply({
+				flags: MessageFlags.Ephemeral, 
+				content: `There is no ${className} class in your selected version of Godot`,
+			});
+			return;
+		}
 		const classNameLower = className.toLowerCase();
 		const path = `${version_mapping[version]}/classes/class_${classNameLower}.html`;
 		await interaction.reply({ embeds: [
@@ -88,6 +104,32 @@ unit.createCommand()
 					+ 'documentation by pressing F1 in Godot and searching for a class name.',
 				),
 		] });
+	})
+	.setAutocompleteCallback(async interaction => {
+		const options = interaction.options._hoistedOptions;
+		const input = interaction.options.getFocused().toLowerCase();
+		// don't autocomplete when there is no version selected
+		if (options[0].name != 'version') {
+			return;
+		}
+		const version = config.docVersions[options[0].value];
+		try {
+			const stats = fs.statSync(`instance/global-class-list-${version.urlFragment}.csv`);
+			const lastModified = stats.mtime.getTime();
+			if (lastModified > classList[version.urlFragment].lastModified) {
+				classList[version.urlFragment].lastModified = lastModified;
+				const file = fs.readFileSync(`instance/global-class-list-${version.urlFragment}.csv`, 'utf8');
+				classList[version.urlFragment].classes = file.split('\n');
+			}
+		}
+		catch (error) {
+			console.error('Error reading file: ', error);
+		}
+		const classes = classList[version.urlFragment].classes;
+		const filtered = classes.filter(Class => Class.toLowerCase().startsWith(input));
+		await interaction.respond(
+			filtered.slice(0, 25).map(Class => ({ name: Class, value: Class })),
+		);
 	})
 ;
 
