@@ -1,7 +1,6 @@
-const { SlashCommandStringOption, MessageFlags } = require('discord.js');
+const { SlashCommandStringOption } = require('discord.js');
 const { Unit } = require('../lib/units.js');
 const { GodotEmbedBuilder } = require('../lib/helpers.js');
-const Https = require('node:https');
 
 
 const base_url = 'https://docs.godotengine.org/en/';
@@ -77,29 +76,18 @@ unit.createCommand()
 		.setRequired(true))
 	.setCallback(async interaction => {
 		const version = interaction.options.getString('version');
-		const className = interaction.options.getString('class').replace(/ /g, '');
+		const className = interaction.options.getString('class');
 		const classNameLower = className.toLowerCase();
 		const path = `${version_mapping[version]}/classes/class_${classNameLower}.html`;
-		const url = new URL(path, base_url).href
-
-		Https.get(url, async res => {
-			if (res.statusCode == 200) {
-				await interaction.reply({ embeds: [
-					new GodotEmbedBuilder()
-					.setTitle(`${className} Documentation (Godot ${version})`)
-					.setURL(url)
-					.setDescription(
-						`Online API Reference for ${className}. You can also use the offline `
-						+ 'documentation by pressing F1 in Godot and searching for a class name.',
-					),
-				] });
-			} else {
-				const msg = `The class ${className} wasn't found in the godot docs. Feel free to `
-				+ `search the docs yourself: ${new URL(version_mapping[version], base_url).href}, `
-				+ 'or try using the offline documentation by pressing F1 in Godot.';
-				await interaction.reply({ content: msg, flags: MessageFlags.Ephemeral });
-			}
-		})
+		await interaction.reply({ embeds: [
+			new GodotEmbedBuilder()
+				.setTitle(`${className} Documentation (Godot ${version})`)
+				.setURL(new URL(path, base_url).href)
+				.setDescription(
+					`Online API Reference for ${className}. You can also use the offline `
+					+ 'documentation by pressing F1 in Godot and searching for a class name.',
+				),
+		] });
 	})
 ;
 
