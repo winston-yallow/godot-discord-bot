@@ -24,7 +24,7 @@ const embedQuestions = new GodotEmbedBuilder()
 				+ '- What are you trying to do? (show your node setup / code)\n'
 				+ '- What is the expected result?\n'
 				+ '- What is happening instead? (include any error messages)\n'
-				+ '- What have you tried so far?'
+				+ '- What have you tried so far?\n'
 				+ '- What type of game is this, 2D or 3D?',
 		},
 		{
