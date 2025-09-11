@@ -144,6 +144,7 @@ class ModularClient extends Client {
 	async #onCommandInteraction(interaction) {
 		const cmd = this.#slashCommands.get(interaction.commandName);
 		if (interaction instanceof AutocompleteInteraction) {
+			if (!cmd) return;
 			cmd.autocompleteCallback(interaction);
 			return;
 		}
