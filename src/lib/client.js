@@ -10,6 +10,7 @@ const {
 	REST,
 	Routes,
 	AutocompleteInteraction,
+	MessageFlags,
 } = require('discord.js');
 const classFetch = require('../utils/fetch-godot-classes');
 const { Unit, RateLimitError } = require('./units.js');
@@ -151,7 +152,7 @@ class ModularClient extends Client {
 
 		if (!cmd) {
 			console.error(ModularClient.ERR_INVALID_CMD, interaction.commandName);
-			await interaction.reply({ content: ModularClient.MSG_SERVER_ERROR, ephemeral: true });
+			await interaction.reply({ content: ModularClient.MSG_SERVER_ERROR, flags: MessageFlags.Ephemeral });
 			return;
 		}
 
@@ -169,10 +170,10 @@ class ModularClient extends Client {
 			}
 			// Send the message using either a follow up or a reply
 			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp({ content: msg, ephemeral: true });
+				await interaction.followUp({ content: msg, flags: MessageFlags.Ephemeral });
 			}
 			else {
-				await interaction.reply({ content: msg, ephemeral: true });
+				await interaction.reply({ content: msg, flags: MessageFlags.Ephemeral });
 			}
 		}
 	}
@@ -185,7 +186,7 @@ class ModularClient extends Client {
 		const cmd = this.#contextCommands.get(interaction.commandName);
 		if (!cmd) {
 			console.error(ModularClient.ERR_INVALID_CMD, interaction.commandName);
-			await interaction.reply({ content: ModularClient.MSG_SERVER_ERROR, ephemeral: true });
+			await interaction.reply({ content: ModularClient.MSG_SERVER_ERROR, flags: MessageFlags.Ephemeral });
 			return;
 		}
 
@@ -203,10 +204,10 @@ class ModularClient extends Client {
 			}
 			// Send the message using either a follow up or a reply
 			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp({ content: msg, ephemeral: true });
+				await interaction.followUp({ content: msg, flags: MessageFlags.Ephemeral });
 			}
 			else {
-				await interaction.reply({ content: msg, ephemeral: true });
+				await interaction.reply({ content: msg, flags: MessageFlags.Ephemeral });
 			}
 		}
 	}
