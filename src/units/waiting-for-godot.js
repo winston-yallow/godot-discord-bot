@@ -5,12 +5,33 @@ const unit = new Unit();
 const PROPOSALS_REPO = 'godotengine/godot-proposals';
 const ISSUES_REPO = 'godotengine/godot';
 
-const MAX_PAGES = 1;
-const MAX_ISSUES = 10;
+const MAX_PAGES = 2; // 2 in original Python
+const MAX_ISSUES = 100; // 100 in original Python
+
+const specialCategoryNames = {
+    'gui': 'GUI',
+    '3d': '3D',
+    '2d': '2D',
+    'vfx': 'VFX',
+    'gdscript': 'GDScript',
+    'dotnet': '.NET',
+    'visualscript': 'VisualScript',
+    'xr': 'XR',
+    'gdextension': 'GDExtension',
+    'thirdparty': 'Third-Party'
+};
+
+const typeAndStatus = {
+    'merged_pr': ':purple_circle: [M][PR]',
+    'closed_pr': ':red_circle: [C][PR]',
+    'completed_issue': ':purple_circle: [C]',
+    'not_planned_issue': ':red_circle: [N]',
+    'reopened_issue': ':green_circle: [R]',
+    'duplicate_issue': ':black_circle: [D]'
+};
 
 // TODO: Use previous day (check for new stuff etc)
-// TODO: Split post into multiple parts as necessary(?)
-// TODO: Use all 4.* instead of just 4.x milestone
+// TODO: Add a way to get GitHub token from config file
 
 function createHeader() {
     // TODO: Count the days
@@ -28,26 +49,7 @@ function createFooter() {
 
 async function getIssuesReport(milestone, repo, type, title, timefilter, state, stateReason = null, event = null) {
     let countIssues = 0;
-    let output = "";
-
-    let labelList = { "core": "", "documentation":"", "editor":"", "gui":"", "input":"", "audio":"", 
-                "rendering":"", "shaders":"", "3d":"", "2d":"", "particles":"", "vfx":"", "animation":"",  
-                "physics":"", "codestyle":"", "gdscript":"", "dotnet":"", "visualscript":"",  "navigation":"", "multiplayer":"", "network":"", "xr":"", 
-                "plugin":"", "gdextension":"",
-                "buildsystem":"", "export": "", "import":"", "porting":"", "tests":"", "thirdparty":"" }
-
-    const specialCategoryNames = {
-        "gui": "GUI",
-        "3d": "3D",
-        "2d": "2D",
-        "vfx": "VFX",
-        "gdscript": "GDScript",
-        "dotnet": ".NET",
-        "visualscript": "VisualScript",
-        "xr": "XR",
-        "gdextension": "GDExtension",
-        "thirdparty": "Third-Party"
-    };
+    const items = {};
 
     let issuesCollected = new Set();
 
@@ -56,7 +58,7 @@ async function getIssuesReport(milestone, repo, type, title, timefilter, state, 
 
         const url = new URL(`https://api.github.com/search/issues`);
         url.search = new URLSearchParams({
-            q: `repo:${repo} is:${type} milestone:${milestone} state:${state}`,
+            q: `repo:${repo} is:${type} milestone:${milestone} state:${state} ${timefilter}:>=${'2025-11-13T01:00:00Z'}`,
             per_page: MAX_ISSUES.toString(),
             page: i.toString(),
             sort: 'updated'
@@ -79,23 +81,23 @@ async function getIssuesReport(milestone, repo, type, title, timefilter, state, 
 
             // TODO: Check if event existed after last time
             if ((!stateReason || s.state_reason == stateReason) && foundEvent) {
-                let prefix = '';
+                let type_status = '';
 
                 if ('pull_request' in s && !reason) {
                     if (s.pull_request.merged_at) {
-                        prefix = ':purple_circle: [M][PR]';
+                        type_status = 'merged_pr';
                     } else {
-                        prefix = ':red_circle: [C][PR]';
+                        type_status = 'closed_pr';
                     }
                 } else {
                     if (reason == 'completed') {
-                        prefix = ':purple_circle: [C]';
+                        type_status = 'completed_issue';
                     } else if (reason == 'not_planned') {
-                        prefix = ':red_circle: [N]';
+                        type_status = 'not_planned_issue';
                     } else if (reason == 'reopened') {
-                        prefix = ':green_circle: [R]';
+                        type_status = 'reopened_issue';
                     } else if (reason == 'duplicate') {
-                        prefix = ':black_circle: [D]';
+                        type_status = 'duplicate_issue';
                     }
                 }
 
@@ -105,7 +107,6 @@ async function getIssuesReport(milestone, repo, type, title, timefilter, state, 
                 }
                 issuesCollected.add(s.number);
 
-                let c = `${prefix} [#${s.number}](<${s.html_url}>): ${s.title}\n`;
                 let approved = false;
                 let t = '';
 
@@ -120,48 +121,36 @@ async function getIssuesReport(milestone, repo, type, title, timefilter, state, 
                     }
                 }
 
-                if (labelList.hasOwnProperty(t)) {
-                    labelList[t] += c;
-                } else {
-                    labelList[t] = c;
-                }
+                const issueItem = {
+                    type_status: type_status,
+                    number: s.number,
+                    url: s.html_url,
+                    title: s.title
+                };
 
+                if (!items.hasOwnProperty(t)) {
+                    items[t] = [];
+                }
+                items[t].push(issueItem);
                 countIssues += 1;
             }
         }
     }
 
     if (countIssues <= 0) {
-        return null;
+        return {};
     }
 
-    for (const l of Object.keys(labelList)) {
-        if (labelList[l].trim().length > 0) {
-            output += `__**`;
-            output += `${l in specialCategoryNames ? specialCategoryNames[l] : (l.charAt(0).toUpperCase() + l.slice(1))}`;
-            output += `**__\n${labelList[l].trim()}\n\n`;
-        }
-    }
-
-    return `**${title}${countIssues > 1 ? 's' : ''} (${countIssues}):**\n${output}\n\n`;
+    return items;
 }
 async function getAllIssuesReport(milestone, repo, title, timefilter, state, stateReason = null, event = null) {
-    let tmp = "";
+    let pullRequests = await getIssuesReport(milestone, repo, 'pull-request', `${state} Pull Request`, timefilter, state, stateReason, event);
+    let issues = await getIssuesReport(milestone, repo, 'issue', title, timefilter, state, stateReason, event);
 
-    let c = await getIssuesReport(milestone, repo, 'pull-request', `${state} Pull Request`, timefilter, state, stateReason, event);
-    if (c) {
-        tmp += `${c}~~----------------------------------------------------~~\n\n`;
-    }
-
-    c = await getIssuesReport(milestone, repo, 'issue', title, timefilter, state, stateReason, event);
-    if (c) {
-        tmp += c;
-    }
-
-    return tmp;
+    return {pullRequests: pullRequests, issues: issues};
 }
 
-async function getMilestonesReport(repo, header, title, filter = '^4.x') {
+async function getMilestonesReport(repo, header, title, filter = '^4\.') {
     const response = await fetch(`https://api.github.com/repos/${repo}/milestones`, {
         method: 'GET',
         headers: {
@@ -169,7 +158,7 @@ async function getMilestonesReport(repo, header, title, filter = '^4.x') {
         }
     });
     const data = await response.json();
-    let tmp = "";
+    const collection = {};
     for (const item of data) {
         if (item.title.search(filter) < 0) {
             continue;
@@ -188,58 +177,81 @@ async function getMilestonesReport(repo, header, title, filter = '^4.x') {
             complete_percent = Math.floor(100.0 - ((num_open_issues * 100.0) / (num_open_issues + num_closed_issues)));
         }
 
-        let contentExisted = false;
-        let t = "";
+        collection[item.title] = {
+            reopened: await getAllIssuesReport(item.title, repo, `Reopened ${title}`, 'updated', 'open', 'reopened', 'reopened'),
+            closed: await getAllIssuesReport(item.title, repo, `Closed ${title}`, 'closed', 'closed')
+        };
+    }
 
-        // Reopened Proposals
-        let c = await getAllIssuesReport(item.title, repo, `Reopened ${title}`, 'updated', 'open', 'reopened', 'reopened');
-        if (c.length > 0) {
-            contentExisted = true;
-            t += `${c}\n\n`
-        }
+    return collection;
+}
 
-        t = t.trim();
-        t += '\n\n\n';
-
-        // Closed Proposals
-        c = await getAllIssuesReport(item.title, repo, `Closed ${title}`, 'closed', 'closed');
-        if (c.length > 0) {
-            contentExisted = true;
-            t += `${c}\n\n`;
-        }
-
-        t = t.trim();
-
-        if (contentExisted) {
-            tmp += `\n**${header} ${item.title}:** ${complete_percent}% complete `;
-            tmp += `(${num_open_issues} open / ${num_closed_issues} closed)\n`;
-            tmp += t;
+function prettifyReportResults(report) {
+    let output = '';
+    for (let version in report) {
+        for (let status of ['reopened', 'closed']) {
+            for (let itemType of ['pullRequests', 'issues']) {
+                if (Object.keys(report[version][status][itemType]).length <= 0) {
+                    continue;
+                }
+                output += `## ${version} ${status} ${itemType == 'pullRequests' ? 'PRs' : itemType}\n`;
+                for (let category in report[version][status][itemType]) {
+                    output += `### ${category in specialCategoryNames ? specialCategoryNames[category] : (category.charAt(0).toUpperCase() + category.slice(1))}\n`;
+                    for (let item of report[version][status][itemType][category]) {
+                        output += `${typeAndStatus[item.type_status]} [#${item.number}](<${item.url}>): ${item.title}\n`;
+                    }
+                }
+            }
         }
     }
 
-    tmp = tmp.trim();
-    tmp += '\n\n';
-    return tmp;
+    return output;
 }
 
+function breakStringIntoChunks(bigString) {
+    let lines = [];
+    let currentString = '';
+    let splitString = bigString.split('\n');
+    for (let line of splitString) {
+        let possibleNewString = currentString + '\n' + line;
+        if (possibleNewString.length < 2000) {
+            currentString = possibleNewString;
+        } else {
+            lines.push(currentString);
+            currentString = line;
+        }
+    }
+
+    if (currentString.length > 0) {
+        lines.push(currentString);
+    }
+
+    return lines;
+}
 async function createReport() {
-    let text = createHeader();
+    let output = createHeader();
 
     // Proposals
-    text += await getMilestonesReport(PROPOSALS_REPO, 'Proposals', 'Proposal');
+    let proposals = await getMilestonesReport(PROPOSALS_REPO, 'Proposals', 'Proposal');
+    let proposalsText = prettifyReportResults(proposals);
+    if (proposalsText.length > 0) {
+        output += '# Proposals\n' + proposalsText;
+    }
 
     // Issues
-    text += await getMilestonesReport(ISSUES_REPO, 'Milestones', 'Issue');
+    let issues = await getMilestonesReport(ISSUES_REPO, 'Milestones', 'Issue');
+    let issuesText = prettifyReportResults(issues);
+    if (issuesText.length > 0) {
+        output += '# Issues\n' + issuesText;
+    }
+
 
     // Footer
-    text += createFooter();
+    output += '\n';
+    output += createFooter();
 
-    console.log('THE BIG ENCHILADA:');
-    console.log(text);
-    console.log('END OF LARGE ENCHILADA');
-
-    console.log('PRECISE SIZE OF ENCHILADA:', text.length);
-    return text;
+    let stringInChunks = breakStringIntoChunks(output);
+    return stringInChunks;
 }
 
 unit.createCommand()
@@ -248,7 +260,10 @@ unit.createCommand()
 	.setDescription('Explains how Godot is usually pronounced')
 	.setCallback(async interaction => {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-		await interaction.editReply({ content: await createReport() });
+        let reportItems = await createReport();
+        for (let i of reportItems) {
+            await interaction.followUp({ content: i });
+        }
 	});
 
 module.exports = unit;
