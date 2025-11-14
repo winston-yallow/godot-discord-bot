@@ -1,13 +1,16 @@
 const { Unit } = require('../lib/units.js');
 const { MessageFlags } = require('discord.js');
+const config = require('../../instance/config');
 const unit = new Unit();
 
 const PROPOSALS_REPO = 'godotengine/godot-proposals';
 const ISSUES_REPO = 'godotengine/godot';
 
-const MAX_PAGES = 2; // 2 in original Python
-const MAX_ISSUES = 100; // 100 in original Python
+const MAX_PAGES = 2;
+const MAX_ISSUES = 100;
 
+// The date of release of the last minor Godot version.
+// For example, Godot 4.5 was released 9 September 2025.
 const LAST_MINOR_RELEASE = new Date('2025-09-15');
 
 const specialCategoryNames = {
@@ -31,8 +34,6 @@ const typeAndStatus = {
     'reopened_issue': ':green_circle: [R]',
     'duplicate_issue': ':black_circle: [D]'
 };
-
-// TODO: Add a way to get GitHub token from config file
 
 function getDaysSinceLastRelease() {
     let diff = Date.now() - LAST_MINOR_RELEASE.valueOf();
@@ -77,7 +78,7 @@ async function getIssuesReport(milestone, repo, type, title, timefilter, state, 
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${TOKEN}`
+                'Authorization': `Bearer ${config.github_token}`
             }
         });
         const data = await response.json();
@@ -94,7 +95,7 @@ async function getIssuesReport(milestone, repo, type, title, timefilter, state, 
                 let eventReq = await fetch(`https://api.github.com/repos/${repo}/issues/${s['number']}/events`, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${TOKEN}`
+                        'Authorization': `Bearer ${config.github_token}`
                     }
                 });
                 const eventResponse = await eventReq.json();
@@ -185,7 +186,7 @@ async function getMilestonesReport(repo, header, title, filter = '^4\.') {
     const response = await fetch(`https://api.github.com/repos/${repo}/milestones`, {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${TOKEN}`
+            'Authorization': `Bearer ${config.github_token}`
         }
     });
     const data = await response.json();
