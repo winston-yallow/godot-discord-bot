@@ -8,6 +8,8 @@ const ISSUES_REPO = 'godotengine/godot';
 const MAX_PAGES = 2; // 2 in original Python
 const MAX_ISSUES = 100; // 100 in original Python
 
+const LAST_MINOR_RELEASE = new Date('2025-09-15');
+
 const specialCategoryNames = {
     'gui': 'GUI',
     '3d': '3D',
@@ -30,12 +32,22 @@ const typeAndStatus = {
     'duplicate_issue': ':black_circle: [D]'
 };
 
-// TODO: Use previous day (check for new stuff etc)
 // TODO: Add a way to get GitHub token from config file
 
+function getDaysSinceLastRelease() {
+    let diff = Date.now() - LAST_MINOR_RELEASE.valueOf();
+    let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    return days;
+}
+
+function getOneDayAgo() {
+    let day = Date.now();
+    day -= (1000 * 60 * 60 * 24);
+    return new Date(day);
+}
+
 function createHeader() {
-    // TODO: Count the days
-    let header = `**Day XXX** :gdcute: \n`;
+    let header = `**Day ${getDaysSinceLastRelease()}** :gdcute: \n`;
     header += 'Waiting for **Godot 4.x dev/beta/rc/stable**\n\n';
     return header;
 }
@@ -54,11 +66,9 @@ async function getIssuesReport(milestone, repo, type, title, timefilter, state, 
     let issuesCollected = new Set();
 
     for (let i = 0; i < MAX_PAGES + 1; i++) {
-        // TODO: add time filter
-
         const url = new URL(`https://api.github.com/search/issues`);
         url.search = new URLSearchParams({
-            q: `repo:${repo} is:${type} milestone:${milestone} state:${state} ${timefilter}:>=${'2025-11-13T01:00:00Z'}`,
+            q: `repo:${repo} is:${type} milestone:${milestone} state:${state} ${timefilter}:>=${getOneDayAgo().toISOString()}`,
             per_page: MAX_ISSUES.toString(),
             page: i.toString(),
             sort: 'updated'
@@ -79,7 +89,28 @@ async function getIssuesReport(milestone, repo, type, title, timefilter, state, 
             const reason = s.state_reason;
             let foundEvent = true;
 
-            // TODO: Check if event existed after last time
+            if (event != null && (stateReason == null || (stateReason != null && (stateReason !== event || (stateReason === event && s['state_reason'] === stateReason))))) {
+                foundEvent = false;
+                let eventReq = await fetch(`https://api.github.com/repos/${repo}/issues/${s['number']}/events`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`
+                    }
+                });
+                const eventResponse = await eventReq.json();
+
+                for (const e of eventResponse) {
+                    if (e['event'] === event) {
+                        let datetimeE = new Date(e['created_at']);
+                        let diff = datetimeE.valueOf() - getOneDayAgo().valueOf();
+                        if (diff >= 0.0) {
+                            foundEvent = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
             if ((!stateReason || s.state_reason == stateReason) && foundEvent) {
                 let type_status = '';
 
@@ -163,7 +194,10 @@ async function getMilestonesReport(repo, header, title, filter = '^4\.') {
         if (item.title.search(filter) < 0) {
             continue;
         }
-        // TODO: add check for new
+
+        if (new Date(item['updated_at']).valueOf() <= getOneDayAgo().valueOf()) {
+            continue;
+        }
 
         let num_open_issues = item.open_issues;
         let num_closed_issues = item.closed_issues;
