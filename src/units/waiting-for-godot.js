@@ -78,7 +78,7 @@ async function getIssuesReport(milestone, repo, type, title, timefilter, state, 
         const response = await fetch(url, {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${config.github_token}`
+                'Authorization': `Bearer ${config.githubToken}`
             }
         });
         const data = await response.json();
@@ -95,7 +95,7 @@ async function getIssuesReport(milestone, repo, type, title, timefilter, state, 
                 let eventReq = await fetch(`https://api.github.com/repos/${repo}/issues/${s['number']}/events`, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${config.github_token}`
+                        'Authorization': `Bearer ${config.githubToken}`
                     }
                 });
                 const eventResponse = await eventReq.json();
@@ -186,7 +186,7 @@ async function getMilestonesReport(repo, header, title, filter = '^4\.') {
     const response = await fetch(`https://api.github.com/repos/${repo}/milestones`, {
         method: 'GET',
         headers: {
-            'Authorization': `Bearer ${config.github_token}`
+            'Authorization': `Bearer ${config.githubToken}`
         }
     });
     const data = await response.json();

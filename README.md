@@ -20,6 +20,7 @@ Create a JavaScript file at `./instance/config.js` with the following content, o
 const config = {
   clientId: "CLIENT_ID",
   token: "TOKEN",
+  githubToken: 'GITHUB_TOKEN',
   admins: [],
   docVersions: {
     3: { displayName: "Godot 3 (LTS)", urlFragment: "3.6" },
@@ -39,6 +40,8 @@ commands registered for the discord application. At the very least this list sho
 contain your own user ID.
 The `"guildConfigs"` field should list all guild IDs that the commands should be registered
 in, followed with the channel used for moderation alerts, and moderator role that should be pinged in that server.
+
+The `"githubToken"` field should be a GitHub API token (such as a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)), used for querying the Godot repositories with the "Waiting for Godot" functionality.
 
 ## Running the Bot
 

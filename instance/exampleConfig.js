@@ -5,7 +5,7 @@
 const config = {
 	clientId: 'CLIENT_ID',
 	token: 'TOKEN',
-	github_token: 'GITHUB_TOKEN',
+	githubToken: 'GITHUB_TOKEN',
 	admins: [],
 	docVersions: {
 		'3': { displayName: 'Godot 3 (LTS)', urlFragment: '3.6' },
