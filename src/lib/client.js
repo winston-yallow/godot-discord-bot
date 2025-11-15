@@ -14,13 +14,16 @@ const {
 const classFetch = require('../utils/fetch-godot-classes');
 const { Unit, RateLimitError } = require('./units.js');
 const path = require('node:path');
+const cron = require('cron');
 const fs = require('node:fs')
+const { createReport } = require('../utils/waiting-for-godot');
 
 /**
  * @typedef {object} GuildConfig
  * Configuration for a specific guild
  * @property {string} modChannel - ID of the moderation channel for the guild
  * @property {string} modRole - ID of the moderation role for the guild
+ * @property {string} waitingForGodotChannel - ID of the channel to post "Waiting for Godot" update messages in
  */
 
 /**
@@ -73,6 +76,19 @@ class ModularClient extends Client {
 		this.on(Events.InteractionCreate, this.#onInteractionCreate);
 		this.on(Events.MessageCreate, this.#onMessageCreate);
 		this.once(Events.ClientReady, c => {
+			let waitingForGodotJob = new cron.CronJob('0 0 * * *', async () => {
+				for (const guildId of Object.keys(config.guildConfigs)) {
+					console.log(`Running WfG at ${new Date().toLocaleString()}`);
+					const guild = this.guilds.cache.get(guildId);
+					const channel = guild.channels.cache.get(config.guildConfigs[guildId].waitingForGodotChannel);
+					
+					const reportChunks = await createReport();
+					for (const chunk of reportChunks) {
+						channel.send(chunk);
+					}
+				}
+			});
+			waitingForGodotJob.start();
 			console.log(`Ready! Logged in as ${c.user.tag}`);
 		});
 

@@ -1,7 +1,4 @@
-const { Unit } = require('../lib/units.js');
-const { MessageFlags } = require('discord.js');
-const config = require('../../instance/config');
-const unit = new Unit();
+const config = require('../../instance/config.js');
 
 const PROPOSALS_REPO = 'godotengine/godot-proposals';
 const ISSUES_REPO = 'godotengine/godot';
@@ -289,16 +286,4 @@ async function createReport() {
     return stringInChunks;
 }
 
-unit.createCommand()
-	.setName('waiting-for-godot')
-	.setRateLimit(10)
-	.setDescription('Explains how Godot is usually pronounced')
-	.setCallback(async interaction => {
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-        let reportItems = await createReport();
-        for (let i of reportItems) {
-            await interaction.followUp({ content: i });
-        }
-	});
-
-module.exports = unit;
+module.exports = { createReport };
