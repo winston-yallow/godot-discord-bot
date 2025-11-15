@@ -76,9 +76,15 @@ class ModularClient extends Client {
 		this.on(Events.InteractionCreate, this.#onInteractionCreate);
 		this.on(Events.MessageCreate, this.#onMessageCreate);
 		this.once(Events.ClientReady, c => {
-			let waitingForGodotJob = new cron.CronJob('0 0 * * *', async () => {
-				for (const guildId of Object.keys(config.guildConfigs)) {
-					console.log(`Running WfG at ${new Date().toLocaleString()}`);
+			for (const guildId of Object.keys(config.guildConfigs)) {
+				if (!('waitingForGodotChannel' in config.guildConfigs[guildId])) {
+					console.log(`No WfG channel set up for guild ${guildId}, so not setting up a job`);
+					continue;
+				}
+
+				let job = new cron.CronJob('0 0 * * *', async () => {
+					console.log(`Running WfG at ${new Date().toLocaleString()} for guild ${guildId}`);
+					
 					const guild = this.guilds.cache.get(guildId);
 					const channel = guild.channels.cache.get(config.guildConfigs[guildId].waitingForGodotChannel);
 					
@@ -86,9 +92,11 @@ class ModularClient extends Client {
 					for (const chunk of reportChunks) {
 						channel.send(chunk);
 					}
-				}
-			});
-			waitingForGodotJob.start();
+				});
+				job.start();
+				console.log(`WfG job set up for guild ${guildId}`);
+			}
+			
 			console.log(`Ready! Logged in as ${c.user.tag}`);
 		});
 
