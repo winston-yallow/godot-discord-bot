@@ -27,7 +27,7 @@ const config = {
     4: { displayName: "Godot 4 (stable)", urlFragment: "stable" },
   },
   guildConfigs: {
-    "GUILD_ID": { modChannel: "CHANNEL_ID", modRole: "ROLE_ID" },
+    "GUILD_ID": { modChannel: "CHANNEL_ID", modRole: "ROLE_ID", waitingForGodotChannel: 'CHANNEL_ID' },
   },
 };
 
@@ -42,6 +42,7 @@ The `"guildConfigs"` field should list all guild IDs that the commands should be
 in, followed with the channel used for moderation alerts, and moderator role that should be pinged in that server.
 
 The `"githubToken"` field should be a GitHub API token (such as a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)), used for querying the Godot repositories with the "Waiting for Godot" functionality.
+The `"waitingForGodotChannel"` field should be a channel ID within the guild where the bot should post the daily "Waiting for Godot" messages.
 
 ## Running the Bot
 
