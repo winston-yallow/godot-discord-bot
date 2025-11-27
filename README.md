@@ -8,7 +8,7 @@ but can be used for other servers too.
 
 ### Obtaining a Token
 
-Please follow the [discord.js Guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot)
+Please follow the [discord.js Guide](https://discordjs.guide/legacy/preparations/app-setup)
 for creating an application and getting a token.
 
 ### Configuring the Bot
