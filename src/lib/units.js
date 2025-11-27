@@ -7,12 +7,17 @@ class RateLimitError extends Error { }
 
 /**
  * @callback SlashCallback
- * @param interaction {import('discord.js').ChatInputCommandInteraction}
+ * @param {import('discord.js').ChatInputCommandInteraction} interaction
+ */
+
+/**
+ * @callback AutocompleteCallback
+ * @param {import('discord.js').AutocompleteInteraction} interaction
  */
 
 /**
  * @callback ContextMenuCallback
- * @param interaction {import('discord.js').ContextMenuCommandInteraction}
+ * @param {import('discord.js').ContextMenuCommandInteraction} interaction
  */
 
 /**
@@ -21,6 +26,9 @@ class RateLimitError extends Error { }
 class SlashCallbackBuilder extends SlashCommandBuilder {
 	/** @type {SlashCallback} */
 	callback;
+
+	/** @type {AutocompleteCallback} */
+	autocompleteCallback;
 
 	/** @type {number} */
 	#rateLimit = 0;
@@ -31,9 +39,21 @@ class SlashCallbackBuilder extends SlashCommandBuilder {
 	/**
 	 * Defines the callback for this slash command
 	 * @param {SlashCallback} callback The function to call when the command is run
+	 * @returns {SlashCallbackBuilder} this object for further interaction
 	 */
 	setCallback(callback) {
 		this.callback = callback;
+		return this;
+	}
+
+	/**
+	 * Defines the autocomplete callback for this slash command
+	 * @param {AutocompleteCallback} callback The function to call when the autocomplete is triggered
+	 * @returns {SlashCallbackBuilder} this object for further interaction
+	 */
+	setAutocompleteCallback(callback) {
+		this.autocompleteCallback = callback;
+		return this;
 	}
 
 	/**
