@@ -26,4 +26,5 @@ FROM bot-base AS bot-prod
 ENV NODE_ENV=production
 RUN npm ci && npm cache clean --force
 COPY "src/" "./src/"
+COPY "instance" "./instance/"
 CMD ["node", "."]

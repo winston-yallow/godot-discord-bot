@@ -5,6 +5,9 @@ const config = require('../../instance/config');
 
 const baseUrl = 'https://docs.godotengine.org/en/';
 
+/**
+ * Fetches and parses the classes from the godot docs site
+ */
 async function fetchAndParse() {
 	try {
 		const docVersions = config.docVersions;
@@ -31,7 +34,8 @@ async function fetchAndParse() {
 
 			console.log(`CSV file generated successfully for version ${version.urlFragment}!`);
 		});
-	} catch (error) {
+	}
+	catch (error) {
 		console.error('Error fetching or parsing page:', error);
 	}
 }

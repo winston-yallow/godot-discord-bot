@@ -15,7 +15,8 @@
     "discord.js": "^14.22.1"
   },
   "devDependencies": {
-    "eslint": "^9.0.0",
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.34.0",
     "eslint-plugin-jsdoc": "^46.2.6",
     "nodemon": "^3.0.1"
   }
