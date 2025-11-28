@@ -55,6 +55,9 @@ class ModularClient extends Client {
 	/** @type {ModularClientConfig} */
 	#config;
 
+	/** @type {cron.CronJob} */
+	#waitingJob;
+
 	/** @type {Collection<string, import('./units.js').SlashCallbackBuilder>} */
 	#slashCommands = new Collection();
 	/** @type {Collection<string, import('./units.js').ContextMenuCallbackBuilder>} */
@@ -73,30 +76,12 @@ class ModularClient extends Client {
 			partials: [Partials.Channel],
 		});
 		this.#config = config;
+
+		this.#waitingJob = new cron.CronJob('0 0 * * *', () => this.#createWaitingReport(config));
 		this.on(Events.InteractionCreate, this.#onInteractionCreate);
 		this.on(Events.MessageCreate, this.#onMessageCreate);
 		this.once(Events.ClientReady, c => {
-			for (const guildId of Object.keys(config.guildConfigs)) {
-				if (!('waitingForGodotChannel' in config.guildConfigs[guildId])) {
-					console.log(`No WfG channel set up for guild ${guildId}, so not setting up a job`);
-					continue;
-				}
-
-				let job = new cron.CronJob('0 0 * * *', async () => {
-					console.log(`Running WfG at ${new Date().toLocaleString()} for guild ${guildId}`);
-					
-					const guild = this.guilds.cache.get(guildId);
-					const channel = guild.channels.cache.get(config.guildConfigs[guildId].waitingForGodotChannel);
-					
-					const reportChunks = await createReport();
-					for (const chunk of reportChunks) {
-						channel.send(chunk);
-					}
-				});
-				job.start();
-				console.log(`WfG job set up for guild ${guildId}`);
-			}
-			
+			this.#waitingJob.start();
 			console.log(`Ready! Logged in as ${c.user.tag}`);
 		});
 
@@ -275,6 +260,31 @@ class ModularClient extends Client {
 		else if (msg.content === 'fetch classes') {
 			classFetch.fetchAndParse();
 			await msg.reply({ content: `pulled all classes into the csv!` });
+		}
+	}
+
+	/**
+	 * Builds and sends the "Waiting for Godot" update report to all servers
+	 * for which a channel ID is specified in the config file.
+	 * @param {ModularClientConfig} config 
+	 */
+	async #createWaitingReport(config) {
+		try {
+			const reportChunks = await createReport();
+			for (const guildId of Object.keys(config.guildConfigs)) {
+				if (!('waitingForGodotChannel' in config.guildConfigs[guildId])) {
+					continue;
+				}
+
+				const guild = this.guilds.cache.get(guildId);
+				const channel = guild.channels.cache.get(config.guildConfigs[guildId].waitingForGodotChannel);
+				for (const chunk of reportChunks) {
+					channel.send(chunk);
+				}
+			}
+		}
+		catch (error) {
+			console.error(error);
 		}
 	}
 }
