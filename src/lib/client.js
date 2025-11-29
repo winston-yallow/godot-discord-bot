@@ -23,7 +23,7 @@ const { createReport } = require('../utils/waiting-for-godot');
  * Configuration for a specific guild
  * @property {string} modChannel - ID of the moderation channel for the guild
  * @property {string} modRole - ID of the moderation role for the guild
- * @property {string} waitingForGodotChannel - ID of the channel to post "Waiting for Godot" update messages in
+ * @property {string} [waitingForGodotChannel] - ID of the channel to post "Waiting for Godot" update messages in
  */
 
 /**
@@ -77,7 +77,7 @@ class ModularClient extends Client {
 		});
 		this.#config = config;
 
-		this.#waitingJob = new cron.CronJob('0 0 * * *', () => this.#createWaitingReport(config));
+		this.#waitingJob = new cron.CronJob('0 0 * * *', this.#createWaitingReport.bind(this));
 		this.on(Events.InteractionCreate, this.#onInteractionCreate);
 		this.on(Events.MessageCreate, this.#onMessageCreate);
 		this.once(Events.ClientReady, c => {
@@ -266,18 +266,17 @@ class ModularClient extends Client {
 	/**
 	 * Builds and sends the "Waiting for Godot" update report to all servers
 	 * for which a channel ID is specified in the config file.
-	 * @param {ModularClientConfig} config 
 	 */
-	async #createWaitingReport(config) {
+	async #createWaitingReport() {
 		try {
 			const reportChunks = await createReport();
-			for (const guildId of Object.keys(config.guildConfigs)) {
-				if (!('waitingForGodotChannel' in config.guildConfigs[guildId])) {
+			for (const guildId of Object.keys(this.#config.guildConfigs)) {
+				if (!('waitingForGodotChannel' in this.#config.guildConfigs[guildId])) {
 					continue;
 				}
 
 				const guild = this.guilds.cache.get(guildId);
-				const channel = guild.channels.cache.get(config.guildConfigs[guildId].waitingForGodotChannel);
+				const channel = guild.channels.cache.get(this.#config.guildConfigs[guildId].waitingForGodotChannel);
 				for (const chunk of reportChunks) {
 					channel.send(chunk);
 				}
