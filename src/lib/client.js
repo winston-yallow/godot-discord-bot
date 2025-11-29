@@ -30,6 +30,7 @@ const { createReport } = require('../utils/waiting-for-godot');
  * @typedef ModularClientConfig
  * Configuration data for a ModularClient
  * @property {string} token Discord API token
+ * @property {string} githubToken GitHub access token
  * @property {string[]} admins List of user IDs that are allowed to administrate the bot
  * @property {{[key:string]: {displayName: string, urlFragment: string}}} docVersions
  * @property {string} clientId ID of the Discord application
