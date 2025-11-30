@@ -5,13 +5,14 @@
 const config = {
 	clientId: 'CLIENT_ID',
 	token: 'TOKEN',
+	githubToken: 'GITHUB_TOKEN',
 	admins: [],
 	docVersions: {
 		'3': { displayName: 'Godot 3 (LTS)', urlFragment: '3.6' },
 		'4': { displayName: 'Godot 4 (stable)', urlFragment: 'stable' },
 	},
 	guildConfigs: {
-		'GUILD_ID': { modChannel: 'CHANNEL_ID', modRole: 'ROLE_ID' },
+		'GUILD_ID': { modChannel: 'CHANNEL_ID', modRole: 'ROLE_ID', waitingForGodotChannel: 'CHANNEL_ID' },
 	},
 };
 
