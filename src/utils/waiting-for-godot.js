@@ -10,6 +10,13 @@ const MAX_ISSUES = 100;
 // For example, Godot 4.5 was released 9 September 2025.
 const LAST_MINOR_RELEASE = new Date('2025-09-15');
 
+// An optional emote to include after the day counter.
+// To use a server-specific emote, type the emote into
+// Discord, then prepend a backslash and send the message.
+// The emote string should appear like so:
+//   <:some_emote:123456789123456789>
+const EMOTE = ':robot:';
+
 const specialCategoryNames = {
     'gui': 'GUI',
     '3d': '3D',
@@ -45,8 +52,8 @@ function getOneDayAgo() {
 }
 
 function createHeader() {
-    let header = `**Day ${getDaysSinceLastRelease()}** :gdcute: \n`;
-    header += 'Waiting for **Godot 4.x dev/beta/rc/stable**\n\n';
+    let header = `**Day ${getDaysSinceLastRelease()}** ${EMOTE} \n`;
+    header += 'Waiting for Godot\n\n';
     return header;
 }
 
