@@ -225,18 +225,35 @@ async function getMilestonesReport(repo, header, title, filter = '^4\.') {
     return collection;
 }
 
+function getReadableCategoryName(rawCategory) {
+    if (rawCategory in specialCategoryNames) {
+        return specialCategoryNames[rawCategory];
+    } else {
+        return rawCategory.charAt(0).toUpperCase() + rawCategory.slice(1);
+    }
+}
+
 function prettifyReportResults(report) {
     let output = '';
     for (let version in report) {
         for (let status of ['reopened', 'closed']) {
             for (let itemType of ['pullRequests', 'issues']) {
-                if (Object.keys(report[version][status][itemType]).length <= 0) {
+                let prs_or_issues = report[version][status][itemType];
+                if (Object.keys(prs_or_issues).length <= 0) {
                     continue;
                 }
-                output += `## ${version} ${status} ${itemType == 'pullRequests' ? 'PRs' : itemType}\n`;
-                for (let category in report[version][status][itemType]) {
-                    output += `### ${category in specialCategoryNames ? specialCategoryNames[category] : (category.charAt(0).toUpperCase() + category.slice(1))}\n`;
-                    for (let item of report[version][status][itemType][category]) {
+
+                // Count the total number of items within the categories here.
+                let total_items = 0;
+                for (let category in prs_or_issues) {
+                    total_items += prs_or_issues[category].length;
+                }
+
+                output += `## ${version} ${status} ${itemType == 'pullRequests' ? 'PRs' : itemType} (${total_items})\n`;
+                for (let category in prs_or_issues) {
+                    var items = prs_or_issues[category];
+                    output += `### ${getReadableCategoryName(category)} (${items.length})\n`;
+                    for (let item of items) {
                         output += `${typeAndStatus[item.type_status]} [#${item.number}](<${item.url}>): ${item.title}\n`;
                     }
                 }
