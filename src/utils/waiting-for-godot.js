@@ -7,8 +7,9 @@ const MAX_PAGES = 2;
 const MAX_ISSUES = 100;
 
 // The date of release of the last minor Godot version.
-// For example, Godot 4.5 was released 9 September 2025.
-const LAST_MINOR_RELEASE = new Date('2025-09-15');
+// For example, Godot 4.5 was released 15 September 2025,
+// so during 4.6's development, this string was '2025-09-15'.
+const LAST_MINOR_RELEASE = new Date('2026-01-26');
 
 // An optional emote to include after the day counter.
 // To use a server-specific emote, type the emote into
