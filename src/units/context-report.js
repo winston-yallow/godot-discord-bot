@@ -1,6 +1,6 @@
 // Reports the message to specified channel in config.json. Get the channel id by right clicking any channel on discord in developer mode, and copying the id.
 
-const { ApplicationCommandType, MessageFlags } = require('discord.js');
+const { ApplicationCommandType, MessageFlags, ModalBuilder, LabelBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const { Unit } = require('../lib/units');
 const { GodotEmbedBuilder } = require('../lib/helpers');
 
@@ -11,6 +11,27 @@ unit.createContextMenuCommand()
 	.setRateLimit(10)
 	.setType(ApplicationCommandType.Message)
 	.setCallback(async interaction => {
+
+		if (!interaction.isMessageContextMenuCommand()) return;
+
+		// Create a modal to ask for additional context
+		const modal = new ModalBuilder().setCustomId('reportModal').setTitle('Report User');
+		const contextInput = new TextInputBuilder()
+				.setCustomId('contextInput')
+				.setStyle(TextInputStyle.Paragraph)
+		const contextLabel = new LabelBuilder()
+			.setLabel("Additional context")
+			.setDescription('Add any context that may be useful for moderators when they see this message.')
+			.setTextInputComponent(contextInput);
+
+		// Show the modal
+		modal.addLabelComponents(contextLabel);
+		await interaction.showModal(modal);
+		const modalResponse = await interaction
+			.awaitModalSubmit({ time: 60_000 })
+
+
+		// Send message to mod channel
 		const modChannel = unit.config.guildConfigs[interaction.guildId].modChannel;
 		const modRole = unit.config.guildConfigs[interaction.guildId].modRole;
 		const channel = interaction.client.channels.cache.get(modChannel);
@@ -19,10 +40,12 @@ unit.createContextMenuCommand()
 			.setAuthor({ name: reportedMessage.author.username, iconURL: reportedMessage.author.avatarURL() ?? interaction.user.defaultAvatarURL })
 			.setDescription(reportedMessage.content || '-# no content');
 		const embeds = [embed];
+		const contextResponse = modalResponse.fields.getTextInputValue('contextInput');
 		const msg = `<@&${modRole}> New report created by <@${interaction.user.id}>\n\n`
 		+ `:link: Link: https://discord.com/channels/${interaction.guildId}/${interaction.channelId}/${interaction.targetId}\n`
 		+ `:bust_in_silhouette: Reported User: <@${reportedMessage.author.id}>\n`
-		+ ':speech_balloon: Reported Content:\n';
+		+ `:notepad_spiral: Additional Context: \n\`\`\`\n${contextResponse}\n\`\`\`\n`
+		+ `:speech_balloon: Reported Content:\n`;
 		const files = [];
 		const largeFiles = [];
 		let uploadLimit = 1024 * 1024 * 8; // 8mb
@@ -49,7 +72,9 @@ unit.createContextMenuCommand()
 			embeds.push(largeFilesEmbed);
 		}
 		channel.send({ content: msg, embeds: embeds, files: files });
-		await interaction.reply({ flags: MessageFlags.Ephemeral, content: 'Message has been reported. A staff member will check soon.' });
+
+		await modalResponse.reply({ flags: MessageFlags.Ephemeral, content: 'Message has been reported. A staff member will check soon.' });
+
 	});
 
 module.exports = unit;

@@ -13,7 +13,7 @@
     "axios": "^1.11.0",
     "cheerio": "^1.1.2",
     "cron": "^4.3.4",
-    "discord.js": "^14.22.1"
+    "discord.js": "^14.26.4"
   },
   "devDependencies": {
     "eslint": "^9.0.0",
